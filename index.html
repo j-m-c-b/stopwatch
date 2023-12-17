@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stopwatch with Sound</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #333;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+    }
+
+    #timer {
+      font-size: 2em;
+    }
+
+    #sound {
+      display: none;
+    }
+
+    #startStopButton {
+      padding: 10px 15px;
+      font-size: 1em;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    #startStopButton:hover {
+      background-color: #45a049;
+    }
+
+    #timeInput {
+      margin-top: 10px;
+      padding: 5px;
+      font-size: 1em;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="timer">00:00</div>
+  <input type="number" id="timeInput" placeholder="Set time for sound (in minutes)">
+  <button id="startStopButton" onclick="toggleTimer()">Start</button>
+  <audio id="sound" src="timeUp.wav" preload="auto"></audio>
+  <script>
+    // Stopwatch variables
+    let timerInterval;
+    let startTime;
+    let elapsedTime = 0;
+    let isRunning = false;
+
+    // Sound
+    const sound = document.getElementById('sound');
+    sound.volume = 0.5;
+
+    // Timer display element
+    const timerElement = document.getElementById('timer');
+
+    // Start/Stop button element
+    const startStopButton = document.getElementById('startStopButton');
+
+    // Time input element
+    const timeInput = document.getElementById('timeInput');
+    timeInput.value = "";
+    let alarmTime;
+    let label = "";
+    let firstTime = true;
+    // Toggle timer when the button is clicked
+    function toggleTimer() {
+      if (firstTime) {
+        label = prompt("label");
+        window.addEventListener('beforeunload', function (e) {
+          // Cancel the event
+          e.preventDefault();
+          // Chrome requires returnValue to be set
+          e.returnValue = '';
+
+          // You can provide a custom message to the user
+          return 'Are you sure you want to leave?';
+        });
+        firstTime = false;
+      }
+      if (isRunning) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    // Function to start the timer
+    function startTimer() {
+
+      alarmTime = timeInput.value;
+      if (!isRunning) {
+        isRunning = true;
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimer, 1000);
+        startStopButton.textContent = 'Stop';
+      }
+    }
+
+    // Function to stop the timer
+    function stopTimer() {
+      if (isRunning) {
+        isRunning = false;
+        clearInterval(timerInterval);
+        startStopButton.textContent = 'Start';
+      }
+    }
+
+    // Function to reset the timer
+    function resetTimer() {
+      stopTimer();
+      elapsedTime = 0;
+      updateTimerDisplay();
+    }
+
+
+    // Function to update the timer display
+    function updateTimer() {
+      elapsedTime = Date.now() - startTime;
+      updateTimerDisplay();
+
+      // Check if the specified time has passed and play the sound
+      const targetTime = parseInt(alarmTime) * 60 * 1000 || 0;
+      if (elapsedTime >= targetTime && targetTime > 0) {
+        playSound();
+
+      }
+    }
+
+
+    // Function to update the timer display with the current elapsed time
+    // Function to update the timer display with the current elapsed time
+    // Function to update the timer display with the current elapsed time
+    function updateTimerDisplay() {
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = Math.floor((elapsedTime % 60000) / 1000);
+      const formattedTime = `${padZero(minutes)}:${padZero(seconds)}`;
+      timerElement.textContent = formattedTime;
+
+      // Update the title with the elapsed time in minutes and seconds
+      document.title = `${minutes}:${padZero(seconds)} ${label} ${alarmTime}m`;
+    }
+
+
+
+    // Function to play the sound
+    function playSound() {
+      sound.play();
+    }
+
+    // Function to pad single-digit numbers with a leading zero
+    function padZero(number) {
+      return number < 10 ? `0${number}` : number;
+    }
+
+    // Focus on input on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      timeInput.focus();
+    });
+
+    // Start timer on Enter press in the input box
+    timeInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        toggleTimer();
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>
